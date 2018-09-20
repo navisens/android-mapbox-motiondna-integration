@@ -18,61 +18,32 @@ import com.mapbox.mapboxsdk.plugins.building.BuildingPlugin
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListener{
+class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     lateinit var mapboxMap: MapboxMap
-    lateinit var permissionsManager : PermissionsManager
     lateinit var buildingPlugin: BuildingPlugin
     lateinit var motionDnaRuntimeSource: MotionDnaDataSource
 
     // Your Navisens developer key
-    val navisensDevKey = "NAVISENS_DEV_KEY"
+    val navisensDevKey = "NAVISENS_DEVELOPER_KEY"
 
     // Your mapbox token
     val mapBoxToken = "MAPBOX_TOKEN"
 
 
-    override fun onExplanationNeeded(permissionsToExplain: MutableList<String>?) {
-    }
 
-    override fun onPermissionResult(granted: Boolean) {
-        if (granted) {
-            enableLocationPlugin();
-        } else {
-            Toast.makeText(this, "Location permissions must be on.", Toast.LENGTH_LONG).show();
-            finish();
-        }
-    }
-
-    fun enableLocationPlugin(){
-        if (PermissionsManager.areLocationPermissionsGranted(this)) {
-
-            // Overridding internal data source with MotionDna data source.
-            val locationLayerPlugin = LocationLayerPlugin(mapView, this.mapboxMap, motionDnaRuntimeSource)
-
-            //Follow positioning
-            locationLayerPlugin.cameraMode = CameraMode.TRACKING
-
-            // Renders position only not heading.
-            locationLayerPlugin.renderMode=RenderMode.NORMAL
-            lifecycle.addObserver(locationLayerPlugin)
-        } else {
-            permissionsManager = PermissionsManager(this);
-            permissionsManager.requestLocationPermissions(this);
-        }
-
-    }
 
     override fun onMapReady(mapboxMap: MapboxMap?) {
 //        LocationPluginActivity.this.mapboxMap = mapboxMap;
         this.mapboxMap = mapboxMap!!
 
+        // MotionDna permissions
+
+        ActivityCompat.requestPermissions(this, MotionDnaApplication.needsRequestingPermissions(), REQUEST_MDNA_PERMISSIONS)
+
         // Enable 3D buildings, why? Because it's cool.
         buildingPlugin = BuildingPlugin(mapView, this.mapboxMap)
         buildingPlugin.setVisibility(true)
-
-        // Enable Location.
-        enableLocationPlugin()
     }
 
     companion object {
@@ -82,11 +53,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         // Method called when permissions have been confirmed
 
-        // Mapbox's permissions manager.
-        permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
         // Instantiating MotionDnaDataSource, passing in context, packagemanager and Navisens devkey
         motionDnaRuntimeSource = MotionDnaDataSource(applicationContext, packageManager, navisensDevKey)
+
+        // Overridding internal data source with MotionDna data source.
+        val locationLayerPlugin = LocationLayerPlugin(mapView, this.mapboxMap, motionDnaRuntimeSource)
+
+        //Follow positioning
+        locationLayerPlugin.cameraMode = CameraMode.TRACKING
+
+        // Renders position only not heading.
+        locationLayerPlugin.renderMode=RenderMode.NORMAL
+        lifecycle.addObserver(locationLayerPlugin)
+
     }
 
     lateinit var mapView : MapView
@@ -94,14 +73,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PermissionsListene
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        permissionsManager=PermissionsManager(this)
 
         Mapbox.getInstance(this, mapBoxToken)
 
         setContentView(R.layout.activity_main)
 
         // Request Navisens MotionDna permissions
-        ActivityCompat.requestPermissions(this, MotionDnaApplication.needsRequestingPermissions(), REQUEST_MDNA_PERMISSIONS)
 
         mapView = findViewById(R.id.mapView)
 
