@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 //        LocationPluginActivity.this.mapboxMap = mapboxMap;
         this.mapboxMap = mapboxMap!!
 
-        // MotionDna permissions
+        // Request Navisens MotionDna permissions
 
         ActivityCompat.requestPermissions(this, MotionDnaApplication.needsRequestingPermissions(), REQUEST_MDNA_PERMISSIONS)
 
@@ -78,7 +78,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         setContentView(R.layout.activity_main)
 
-        // Request Navisens MotionDna permissions
 
         mapView = findViewById(R.id.mapView)
 
