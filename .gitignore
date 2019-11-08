@@ -30,6 +30,9 @@ build/
 .navigation
 captures/
 output.json 
+.settings/
+.project
+.classpath
 
 #NDK
 obj/
