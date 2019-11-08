@@ -33,6 +33,7 @@ output.json
 .settings/
 .project
 .classpath
+/app/app.iml
 
 #NDK
 obj/
